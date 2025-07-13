@@ -1,0 +1,24 @@
+services:
+  initialize-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - bundle_cache:/usr/local/bundle
+      - ./api:/test_api
+    command: >
+      bash -c "ls . | grep config.ru || (rails new . --skip --skip-git --skip-test --api --database=postgresql)"
+
+  initialize-ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./ui:/test_ui
+    command: >
+      bash -c "ls . | grep package.json || (yes | npx create-next-app@latest test_ui && cp -r test_ui/* . && rm -rf test_ui)"
+
+volumes: 
+  bundle_cache:

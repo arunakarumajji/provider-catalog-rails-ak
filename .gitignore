@@ -1,0 +1,24 @@
+# Common Rails files to ignore
+api/node_modules
+api/.bundle
+api/log
+api/tmp
+api/db/*.sqlite3
+api/db/*.sqlite3-journal
+api/public/system
+api/public/uploads
+api/vendor/bundle
+api/.env
+api/.env.*
+api/.byebug_history
+
+# Common React/Next files to ignore
+ui/node_modules
+ui/.next
+ui/out
+ui/.env.local
+ui/.env.development.local
+ui/.env.test.local
+ui/.env.production.local
+ui/.vercel
+ui/.swc

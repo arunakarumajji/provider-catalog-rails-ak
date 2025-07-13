@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test_api_development
+    volumes:
+       - postgres_data:/var/lib/postgresql/data  #  For data persistence
+    ports:
+      - "5432:5432"  # Expose Postgres port for external tools
+
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db/test_api_development
+      DEVISE_JWT_SECRET_KEY: c4b20dae3136568f92529cb9e06bedf786fb4d7220566c63bf16a6c00e465d6aa1be202557521639c6c28fe47d46b7c0e4ca5a7f2ee58012dc2c6b4b4394bcfc
+      RAILS_ENV: development  # Explicitly set environment
+    volumes:
+      - bundle_cache:/usr/local/bundle
+      - ./api:/test_api
+      - api_tmp:/test_api/tmp  # Persist temporary files
+      - api_log:/test_api/log  # Persist logs
+    command: bash -c "rm -f /test_api/tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0"
+    healthcheck: # Add healthcheck for container orchestration
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - "8080:3000"
+    depends_on:
+      - api
+    volumes:
+      - ./ui:/test_ui
+      - node_modules:/test_ui/node_modules  # Cache node_modules for faster builds
+
+volumes: 
+  bundle_cache:
+  postgres_data:  # For Postgres data
+  api_tmp:        # Volume for Rails temporary files
+  api_log:        # Volume for Rails logs
+  node_modules:   # Volume for node_modules
